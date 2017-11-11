@@ -60,19 +60,19 @@ defmodule Multipipe do
 
   # If a value is piped into a param statement with an underscore, replace the
   # underscore with the value.
-  defmacro param(value, {:::, _, [index, {:_, _, _}]}) do
+  defmacro param(value, {:::, meta, [index, {:_, _, _}]}) do
     quote do
-      param(unquote({:::, [], [index, value]}))
+      param(unquote({:::, meta, [index, value]}))
     end
   end
 
   # Otherwise, it's assumed the value piped into the statement is already a set
   # of parameters, which is a map. In this case, add the new `index => value`
   # to the map, deleting any value already associated to `index` if it exists.
-  defmacro param({:%{}, context, list}, {:::, _, [index, value]}) do
+  defmacro param({:%{}, meta, list}, {:::, _, [index, value]}) do
     list = List.keydelete(list, index, 0)
     quote do
-      unquote({:%{}, context, list ++ [{index, value}]})
+      unquote({:%{}, meta, list ++ [{index, value}]})
     end
   end
 
@@ -95,11 +95,11 @@ defmodule Multipipe do
   end
 
   # Otherwise, find the lowest index parameter and add it to the function call.
-  defmacro useparams({:%{}, _, list}, partial) do
+  defmacro useparams({:%{}, meta, list}, partial) do
     {index, value} = list |> Enum.min
     partial = Macro.pipe(value, partial, index - 1)
     quote do
-      useparams(unquote({:%{}, nil, list -- [{index, value}]}), unquote(partial))
+      useparams(unquote({:%{}, meta, list -- [{index, value}]}), unquote(partial))
     end
   end
 
