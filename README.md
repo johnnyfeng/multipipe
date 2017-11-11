@@ -3,6 +3,13 @@
 Macros to augment the default pipe, allowing multiple parameter pipes and pipes
 into arbitrary inputs.
 
+## Usage
+
+Clone or copy the library into your project and `import Multipipe` in any module
+that needs it.
+
+## Examples
+
 Our first example of using multiple parameter pipes sets the first parameter as
 "Hello", the second as "World", and pipes them into the string concatenation
 function `Kernel.<>`.
