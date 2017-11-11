@@ -3,8 +3,6 @@
 Macros to augment the default pipe, allowing multiple parameter pipes and pipes
 into arbitrary inputs.
 
-Absolutely nothing is altered with the standard pipe.
-
 Our first example of using multiple parameter pipes sets the first parameter as
 "Hello", the second as "World", and pipes them into the string concatenation
 function `Kernel.<>`.
