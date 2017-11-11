@@ -14,15 +14,18 @@ Our first example of using multiple parameter pipes sets the first parameter as
 "Hello", the second as "World", and pipes them into the string concatenation
 function `Kernel.<>`.
 
-    iex> param(1 :: "Hello") |> param(2 :: "World")
-    ...>                     |> useparams(Kernel.<>)
+    iex> param(1, "Hello") |> param(2, "World")
+    ...>                   |> useparams(Kernel.<>)
     "HelloWorld"
 
 The order of specifying the parameters doesn't matter:
 
-    iex> param(2 :: "World") |> param(1 :: "Hello")
-    ...>                     |> useparams(Kernel.<>)
+    iex> param(2, "World") |> param(1, "Hello")
+    ...>                   |> useparams(Kernel.<>)
     "HelloWorld"
+
+The statement `param(i, value)` means "use `value` as parameter number `i`". The
+syntax must be given as `param(i, value)` or `value |> param(i, _)`.
 
 Once you start collecting parameters with `params` you must either continue
 piping into further `params` statements to collect more parameters, or into a
@@ -32,18 +35,18 @@ If you want to use the output of a pipe as a parameter, piping into a parameter
 statement is also supported by using an underscore:
 
     iex> "olleH" |> String.reverse
-    ...>         |> param(1 :: _)
-    ...>         |> param(2 :: "World")
+    ...>         |> param(1, _)
+    ...>         |> param(2, "World")
     ...>         |> useparams(Kernel.<>)
     "HelloWorld"
 
 Partial parameters are also supported, as long as the other parameters are
 supplied in the function call. This allows for piping into arbitrary inputs:
 
-    iex> param(1 :: "Hello") |> useparams(Kernel.<>("World"))
+    iex> param(1, "Hello") |> useparams(Kernel.<>("World"))
     "HelloWorld"
 
-    iex> param(2 :: "Hello") |> useparams(Kernel.<>("World"))
+    iex> param(2, "Hello") |> useparams(Kernel.<>("World"))
     "WorldHello"
 
 ## Further information, but you probably shouldn't use the module this way.
@@ -52,11 +55,13 @@ statement is not entirely accurate. The result of the `param` statements is a ma
 `%{index => value}` mapping indices to values, so you can technically do whatever
 you want with this.
 
-In fact, the `param` macro can be used to construct arbitrary maps:
+In fact, `param` is basically a macro version of `Map.put/3` and can be used to
+construct arbitrary maps at compile time:
 
-    iex> player = param(:first_name :: "Turd")
-    ...>            |> param(:last_name :: "Ferguson")
-    ...>            |> param(:score :: 0)
+    iex> player = param(:first_name, "Turd")
+    ...>            |> param(:last_name, "Ferguson")
+    ...>            |> param(:score, 0)
     %{first_name: "Turd", last_name: "Ferguson", score: 0}
 
-You can only pass maps with integer keys into `useparams`, however.
+You can only pass maps with integer keys that are defined at compile time into
+`useparams`, however.

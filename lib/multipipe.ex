@@ -7,15 +7,18 @@ defmodule Multipipe do
   "Hello", the second as "World", and pipes them into the string concatenation
   function `Kernel.<>`.
 
-      iex> param(1 :: "Hello") |> param(2 :: "World")
-      ...>                     |> useparams(Kernel.<>)
+      iex> param(1, "Hello") |> param(2, "World")
+      ...>                   |> useparams(Kernel.<>)
       "HelloWorld"
 
   The order of specifying the parameters doesn't matter:
 
-      iex> param(2 :: "World") |> param(1 :: "Hello")
-      ...>                     |> useparams(Kernel.<>)
+      iex> param(2, "World") |> param(1, "Hello")
+      ...>                   |> useparams(Kernel.<>)
       "HelloWorld"
+
+  The statement `param(i, value)` means "use `value` as parameter number `i`". The
+  syntax must be given as `param(i, value)` or `value |> param(i, _)`.
 
   Once you start collecting parameters with `param` you must either continue
   piping into further `param` statements to collect more parameters, or into a
@@ -26,18 +29,18 @@ defmodule Multipipe do
   using an underscore:
 
       iex> "olleH" |> String.reverse
-      ...>         |> param(1 :: _)
-      ...>         |> param(2 :: "World")
+      ...>         |> param(1, _)
+      ...>         |> param(2, "World")
       ...>         |> useparams(Kernel.<>)
       "HelloWorld"
 
   Partial parameters are also supported, as long as the other parameters are
   supplied in the function call. This allows for piping into arbitrary inputs:
 
-      iex> param(1 :: "Hello") |> useparams(Kernel.<>("World"))
+      iex> param(1, "Hello") |> useparams(Kernel.<>("World"))
       "HelloWorld"
 
-      iex> param(2 :: "Hello") |> useparams(Kernel.<>("World"))
+      iex> param(2, "Hello") |> useparams(Kernel.<>("World"))
       "WorldHello"
   """
 
@@ -48,7 +51,7 @@ defmodule Multipipe do
   @doc """
   Collects parameters, which are applied with `useparams`.
 
-  The syntax is `param(index :: value)` to use `value` for the parameter with
+  The syntax is `param(index, value)` to use `value` for the parameter with
   index `index`.
 
   Parameters are collected by piping them into each other, and must terminate by
@@ -56,20 +59,20 @@ defmodule Multipipe do
 
   See the module docs for usage examples.
   """
-  defmacro param(params \\ {:%{}, [], []}, expr)
+  defmacro param(params \\ {:%{}, [], []}, index, value)
 
   # If a value is piped into a param statement with an underscore, replace the
   # underscore with the value.
-  defmacro param(value, {:::, meta, [index, {:_, _, _}]}) do
+  defmacro param(value, index, {:_, _, _}) do
     quote do
-      param(unquote({:::, meta, [index, value]}))
+      param(unquote(index), unquote(value))
     end
   end
 
   # Otherwise, it's assumed the value piped into the statement is already a set
   # of parameters, which is a map. In this case, add the new `index => value`
   # to the map, deleting any value already associated to `index` if it exists.
-  defmacro param({:%{}, meta, list}, {:::, _, [index, value]}) do
+  defmacro param({:%{}, meta, list}, index, value) do
     list = List.keydelete(list, index, 0)
     quote do
       unquote({:%{}, meta, list ++ [{index, value}]})
@@ -77,9 +80,9 @@ defmodule Multipipe do
   end
 
   # For expanding the macro. Is there a way to avoid needing this?
-  defmacro param({:param, _, _} = x, y) do
+  defmacro param({:param, _, _} = x, y, z) do
     quote do
-      param(unquote(x |> expand), unquote(y |> expand))
+      param(unquote(x |> expand), unquote(y |> expand), unquote(z |> expand))
     end
   end
 
