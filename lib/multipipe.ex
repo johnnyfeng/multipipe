@@ -9,14 +9,14 @@ defmodule Multipipe do
   "Hello", the second as "World", and pipes them into the string concatenation
   function `Kernel.<>`.
 
-      iex> (param 1 :: "Hello") |> (param 2 :: "World")
-      ...>                      |> (useparams Kernel.<>)
+      iex> param(1 :: "Hello") |> param(2 :: "World")
+      ...>                     |> useparams(Kernel.<>)
       "HelloWorld"
 
   The order of specifying the parameters doesn't matter:
 
-      iex> (param 2 :: "World") |> (param 1 :: "Hello")
-      ...>                      |> (useparams Kernel.<>)
+      iex> param(2 :: "World") |> param(1 :: "Hello")
+      ...>                     |> useparams(Kernel.<>)
       "HelloWorld"
 
   Once you start collecting parameters with `param` you must either continue
@@ -28,18 +28,18 @@ defmodule Multipipe do
   using an underscore:
 
       iex> "olleH" |> String.reverse
-      ...>         |> (param 1 :: _)
-      ...>         |> (param 2 :: "World")
-      ...>         |> (useparams Kernel.<>)
+      ...>         |> param(1 :: _)
+      ...>         |> param(2 :: "World")
+      ...>         |> useparams(Kernel.<>)
       "HelloWorld"
 
   Partial parameters are also supported, as long as the other parameters are
   supplied in the function call. This allows for piping into arbitrary inputs:
 
-      iex> (param 1 :: "Hello") |> (useparams Kernel.<>("World"))
+      iex> param(1 :: "Hello") |> useparams(Kernel.<>("World"))
       "HelloWorld"
 
-      iex> (param 2 :: "Hello") |> (useparams Kernel.<>("World"))
+      iex> param(2 :: "Hello") |> useparams(Kernel.<>("World"))
       "WorldHello"
   """
 
@@ -50,7 +50,7 @@ defmodule Multipipe do
   @doc """
   Collects parameters, which are applied with `useparams`.
 
-  The syntax is `(param index :: value)` to use `value` for the parameter with
+  The syntax is `param(index :: value)` to use `value` for the parameter with
   index `index`.
 
   Parameters are collected by piping them into each other, and must terminate by
