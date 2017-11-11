@@ -69,9 +69,10 @@ defmodule Multipipe do
   end
 
   # Otherwise, it's assumed the value piped into the statement is already a set
-  # of parameters, which are maps. In this case, add the new `index => value`
-  # to the map.
+  # of parameters, which is a map. In this case, add the new `index => value`
+  # to the map, deleting any value already associated to `index` if it exists.
   defmacro param({:%{}, context, list}, {:::, _, [index, value]}) do
+    list = List.keydelete(list, index, 0)
     quote do
       unquote({:%{}, context, list ++ [{index, value}]})
     end

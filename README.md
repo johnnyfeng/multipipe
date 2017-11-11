@@ -43,7 +43,7 @@ supplied in the function call. This allows for piping into arbitrary inputs:
 
 ## Further information, but you probably shouldn't use the module this way.
 What I said earlier about having to terminate parameter collection with a `useparams`
-statement is technically incorrect. The result of the `param` statements is a map
+statement is not entirely accurate. The result of the `param` statements is a map
 `%{index => value}` mapping indices to values, so you can technically do whatever
 you want with this.
 
@@ -53,3 +53,5 @@ In fact, the `param` macro can be used to construct arbitrary maps:
     ...>            |> (param :last_name :: "Ferguson")
     ...>            |> (param :score :: 0)
     %{first_name: "Turd", last_name: "Ferguson", score: 0}
+
+You can only pass maps with integer keys into `useparams`, however.
