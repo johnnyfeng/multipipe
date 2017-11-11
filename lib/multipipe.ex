@@ -18,15 +18,15 @@ defmodule Multipipe do
       "HelloWorld"
 
   The statement `param(i, value)` means "use `value` as parameter number `i`". The
-  syntax must be given as `param(i, value)` or `value |> param(i, _)`.
+  syntax must be given as `param(i, value)` or, as we'll see below, `value |> param(i, _)`.
 
   Once you start collecting parameters with `param` you must either continue
   piping into further `param` statements to collect more parameters, or into a
   `useparams` statement to use them.
 
   If you want to use the output of a pipe (or any other value that can can be
-  piped) as a parameter, piping into a parameter statement is also supported by
-  using an underscore:
+  piped) as a parameter, piping into a parameter statement is supported by using
+  an underscore:
 
       iex> "olleH" |> String.reverse
       ...>         |> param(1, _)

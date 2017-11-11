@@ -25,14 +25,14 @@ The order of specifying the parameters doesn't matter:
     "HelloWorld"
 
 The statement `param(i, value)` means "use `value` as parameter number `i`". The
-syntax must be given as `param(i, value)` or `value |> param(i, _)`.
+syntax must be given as `param(i, value)` or, as we'll see below, `value |> param(i, _)`.
 
-Once you start collecting parameters with `params` you must either continue
-piping into further `params` statements to collect more parameters, or into a
+Once you start collecting parameters with `param` you must either continue
+piping into further `param` statements to collect more parameters, or into a
 `useparams` statement to use them.
 
 If you want to use the output of a pipe as a parameter, piping into a parameter
-statement is also supported by using an underscore:
+statement is supported by using an underscore:
 
     iex> "olleH" |> String.reverse
     ...>         |> param(1, _)
@@ -55,8 +55,8 @@ statement is not entirely accurate. The result of the `param` statements is a ma
 `%{index => value}` mapping indices to values, so you can technically do whatever
 you want with this.
 
-In fact, `param` is basically a macro version of `Map.put/3` and can be used to
-construct arbitrary maps at compile time:
+`param` is a macro version of `Map.put/3` and can be used to construct arbitrary
+maps at compile time:
 
     iex> player = param(:first_name, "Turd")
     ...>            |> param(:last_name, "Ferguson")
