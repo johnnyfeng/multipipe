@@ -1,11 +1,11 @@
 defmodule Multipipe do
   @moduledoc """
-  Macros to augment the default pipe, allowing multiple parameter pipes and pipes
-  into arbitrary inputs.
+  Macros to augment the default pipe, allowing multiple parameter pipes and
+  pipes into arbitrary inputs.
 
-  Our first example of using multiple parameter pipes sets the first parameter as
-  "Hello", the second as "World", and pipes them into the string concatenation
-  function `Kernel.<>`.
+  Our first example of using multiple parameter pipes sets the first parameter
+  as "Hello", the second as "World", and pipes them into the string
+  concatenation function `Kernel.<>`.
 
       iex> param(1, "Hello") |> param(2, "World")
       ...>                   |> useparams(Kernel.<>)
@@ -51,13 +51,30 @@ defmodule Multipipe do
   @doc """
   Collects parameters, which are applied with `useparams`.
 
-  The syntax is `param(index, value)` to use `value` for the parameter with
-  index `index`.
+  The usage syntax is
+      `param(index, value)`
+  to create a new set of parameters with the given value for the given index, or
+      `param(params, index, value)` to take an existing collection of parameters
+  and set the given index to `value`.
 
-  Parameters are collected by piping them into each other, and must terminate by
-  piping into a `useparams` statement.
+  It is intended to be used with the Elixir pipe, to allow multiple parameter
+  pipes in conjunction with `useparams`:
+      iex> param(1, "Hello") |> param(2, "World") |> useparams(Kernel.<>)
+      "HelloWorld"
 
-  See the module docs for usage examples.
+  To allow parameter collection to start in the middle of a pipeline, there is
+      `param(value, index, _)`
+  provided as a shorthand for `param(index, value)`. For instance:
+      iex> "olleH" |> String.reverse
+      ...>         |> param(1, _)
+      ...>         |> param(2, "World")
+      ...>         |> useparams(Kernel.<>)
+      "HelloWorld"
+
+  Parameters collected by `param` should always be terminated by piping them into
+  a `useparams` statement.
+
+  See the module docs for further usage examples.
   """
   defmacro param(params \\ {:%{}, [], []}, index, value)
 
@@ -90,7 +107,16 @@ defmodule Multipipe do
   @doc """
   Applies a set of parameters collected with `param` statements to a function.
 
-  See the module docs for usage examples.
+  The usage syntax is
+      `useparams(params, function_call)`
+  where `params` is a collection of parameters assembled by `param` statements,
+  and `function_call` is a (possibly partially applied) call to a function, that
+  is, anything you could normally pipe into with the default Elixir pipe `|>`.
+
+  It is intended to be used with the Elixir pipe, for terminating a series of
+  `param` statements.
+
+  See the docs for `Multipipe.param/3` and the module docs for usage examples.
   """
   # If the list of parameters is empty, return the function statement.
   defmacro useparams({:%{}, _, []}, func) do
@@ -111,6 +137,21 @@ defmodule Multipipe do
   defmacro useparams({:param, _, _} = x, partial) do
     quote do
       useparams(unquote(x |> expand), unquote(partial))
+    end
+  end
+
+  @doc """
+  Pipe the input value into a specified parameter of a function call.
+
+  Example usage:
+
+      # function call: String.contains?("foobar", "bar")
+      iex> "bar" |> as_param(2, String.contains?("foobar"))
+      true
+  """
+  defmacro as_param(value, index, func) do
+    quote do
+      unquote(Macro.pipe(value, func, index - 1))
     end
   end
 end
